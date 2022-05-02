@@ -21,20 +21,22 @@ export const SimulateSky = Application.regl({
         void main() {
             vec3 uv = normalize(vUV);
             vec3 horizont = normalize(vHorizont);
+            vec3 pos = normalize(vPos);
 
-            float atmosphere = min(0.0, dot(uv, sunPos));
+            float atmosphere = dot(vec3(0, 1.0, 0), pos);
             float angle = dot(horizont, sunPos);
-            float nangle = -1.0 * min(0.0, angle);
-            float pangle = max(0.0, angle);
+            float nAngle = -1.0 * min(0.0, angle);
+            float pAngle = max(0.0, angle);
 
             float sunSize = 0.05;
 
             float distanceToSun = (1.0 / distance(uv, sunPos));
             
             vec3 texColor = textureCube(skymap, uv).rgb;
-            vec3 finalColor = (skyColor * pangle) + (texColor * nangle) + (sunColor * distanceToSun * sunSize);
+            vec3 color = ((skyColor * pAngle) + (texColor * nAngle * atmosphere)) + (sunColor * distanceToSun * sunSize);
+            vec3 result = mix(vec3(1.0 * pAngle), color, atmosphere + 0.5);
 
-            gl_FragColor = vec4(finalColor, 1.0);
+            gl_FragColor = vec4(result, 1.0);
         }
     `,
     vert: `
