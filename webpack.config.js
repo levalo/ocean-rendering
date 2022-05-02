@@ -28,11 +28,11 @@ module.exports = {
     },
     output: {
         filename: 'app.js',
-        path: path.resolve(__dirname, 'build'),
+        path: path.resolve(__dirname, 'docs'),
     },
     devServer: {
         static: {
-            directory: path.join(__dirname, 'public'),
+            directory: path.join(__dirname, 'docs'),
         },
         port: 8080,
         open: {
