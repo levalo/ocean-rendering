@@ -9,7 +9,8 @@ export const DrawOcean = Application.regl({
         uniform vec3 cameraPosition;
 
         uniform sampler2D heightTex;
-        uniform vec3 lightDirection;
+        uniform vec3 sunPosition;
+        uniform vec3 lightColor;
 
         varying vec4 vWorldPosition;
         varying vec2 vUV;
@@ -18,19 +19,24 @@ export const DrawOcean = Application.regl({
         const vec3 color = vec3(0.0, 0.19, 0.27);
 
         void main() {
+            float lightPower = max(0.3, -1.0 * sunPosition.y);
+            float reflectionPower = max(0.3, 1.0 - lightPower);
+
             vec3 normal = normalize(texture2D(heightTex, vUV).rgb);
             normal = normalize(vTBN * normal);
 
             vec3 foam = mix(vec3(0.0), vec3(1.0), vWorldPosition.y + normal.r);
 
-            //vec3 diff = foam * dot(normal, -1.0 * lightDirection);
+            vec3 ambient = lightColor * lightPower;
+
+            vec3 diff = max(dot(normal, sunPosition), 0.0) * lightColor;
             
             vec3 eyeToSurfaceDir = normalize(vWorldPosition.xyz - cameraPosition);
             vec3 direction = reflect(eyeToSurfaceDir, normal);
 
-            vec3 reflection = textureCube(skyboxCubemap, direction).rgb * 0.3;
+            vec3 reflection = textureCube(skyboxCubemap, direction).rgb * reflectionPower * lightColor;
 
-            gl_FragColor = vec4(foam + color + reflection, 1.0);
+            gl_FragColor = vec4((foam + color) * diff + reflection, 1.0);
         }
     `,
     vert: `
@@ -98,7 +104,8 @@ export const DrawOcean = Application.regl({
     uniforms: {
         heightTex: Application.regl.prop('heightTex' as never),
         skyboxCubemap: Application.regl.prop('skyboxCubemap' as never),
-        lightDirection: Application.regl.prop('lightDirection' as never),
+        sunPosition: Application.regl.prop('sunPosition' as never),
+        lightColor: Application.regl.prop('lightColor' as never),
         model: Application.regl.prop('model' as never),
         scale: Application.regl.prop('scale' as never),
         cameraPosition: () => Application.camera.position,

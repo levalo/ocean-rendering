@@ -6,31 +6,27 @@ export const SimulateSky = Application.regl({
     frag: `
         precision mediump float;
 
-        uniform float time;
+        uniform vec3 sunPosition;
         uniform samplerCube skymap;
 
+        uniform vec3 skyColor;
+        uniform vec3 sunColor;
+
         varying vec3 vUV;
-        varying vec3 vPos;
-        varying vec3 vHorizont;
-
-        const vec3 sunPos = vec3(0, 0, -1);
-
-        const vec3 skyColor = vec3(0.52, 0.80, 0.92);
-        const vec3 sunColor = vec3(0.94, 0.85, 0.64);
+        varying vec3 vPosition;
         
         void main() {
             vec3 uv = normalize(vUV);
-            vec3 horizont = normalize(vHorizont);
-            vec3 pos = normalize(vPos);
+            vec3 pos = normalize(vPosition);
 
             float atmosphere = dot(vec3(0, 1.0, 0), pos);
-            float angle = dot(horizont, sunPos);
+            float angle = dot(vec3(0, -1.0, 0), sunPosition);
             float nAngle = -1.0 * min(0.0, angle);
             float pAngle = max(0.0, angle);
 
             float sunSize = 0.05;
 
-            float distanceToSun = (1.0 / distance(uv, sunPos));
+            float distanceToSun = (1.0 / distance(pos, -sunPosition));
             
             vec3 texColor = textureCube(skymap, uv).rgb;
             vec3 color = ((skyColor * pAngle) + (texColor * nAngle * atmosphere)) + (sunColor * distanceToSun * sunSize);
@@ -44,30 +40,22 @@ export const SimulateSky = Application.regl({
 
         attribute vec3 position;
         
-        uniform float time;
+        uniform vec3 sunPosition;
 
         uniform mat4 look;
         
         varying vec3 vUV;
-        varying vec3 vPos;
-
-        varying vec3 vHorizont;
+        varying vec3 vPosition;
         
         void main() {
-            vec3 rotated = position;
-            float t = time * 0.01;
-
-            float ct = cos(t);
-            float st = sin(t);
-
-            rotated.y = position.y * ct - position.z * st;
-            rotated.z = position.y * st + position.z * ct;
-
-            vHorizont = vec3(0, -1.0 * ct, -1.0 * st);
+            vPosition = position;
 
             vUV = position;
-            vPos = rotated;
-            gl_Position = look * vec4(rotated, 1);
+
+            vUV.y = position.y * sunPosition.z - position.z * sunPosition.y;
+            vUV.z = position.y * sunPosition.y + position.z * sunPosition.z;
+
+            gl_Position = look * vec4(position, 1);
         }
     `,
     attributes: {
@@ -77,7 +65,9 @@ export const SimulateSky = Application.regl({
     uniforms: {
         look: Application.regl.prop('look' as never),
         skymap: Application.regl.prop('skymap' as never),
-        time: Application.regl.prop('time' as never)
+        sunPosition: Application.regl.prop('sunPosition' as never),
+        sunColor: Application.regl.prop('sunColor' as never),
+        skyColor: Application.regl.prop('skyColor' as never)
     },
     depth: {
         enable: false

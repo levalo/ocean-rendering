@@ -22,14 +22,45 @@ export class Sky {
         this._initial(right, left, top, bottom, back, front);
     }
 
+    public update(t: number) {
+        const angle = t * 0.1;
+
+        const ct = Math.cos(angle);
+        const st = Math.sin(angle);
+
+        this._sunPosition[1] = -1.0 * st; // x * c - y * s
+        this._sunPosition[2] = 1.0 * ct; // x * s + y * c
+        
+        vec3.lerp(this._lightColor, this._sunColor, this._skyColor, Math.abs(this._sunPosition[1] * -0.5));
+
+        this.i += 1;
+    }
+
     public get initialTexture() {
         return this._initial;
     }
 
-    public get lightDirection() {
-        return this._lightDirection;
+    public get sunPosition() {
+        return this._sunPosition;
     }
 
-    private _lightDirection: vec3 = vec3.fromValues(0.0, 1.0, 1.0);
+    public get skyColor() {
+        return this._skyColor;
+    }
+
+    public get sunColor() {
+        return this._sunColor;
+    }
+
+    public get lightColor() {
+        return this._lightColor;
+    }
+
+    private i = 0;
+    private _skyColor: vec3 = vec3.fromValues(0.52, 0.80, 0.92);
+    private _sunColor: vec3 = vec3.fromValues(0.94, 0.85, 0.64);
+    private _lightColor: vec3 = vec3.create();
+
+    private _sunPosition: vec3 = vec3.fromValues(0.0, 0.0, 1.0);
     private _initial: REGL.TextureCube;
 }

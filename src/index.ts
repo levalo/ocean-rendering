@@ -27,9 +27,13 @@ const loop = Application.regl.frame(({ time }) => {
 
         //DrawAxes();
 
+        sky.update(time);
+
         skySimulator.run({
             skymap: sky.initialTexture,
-            time: time
+            sunPosition: sky.sunPosition,
+            sunColor: sky.sunColor,
+            skyColor: sky.skyColor,
         });
 
         DrawSkybox({ cubemap: skySimulator.output });
@@ -47,9 +51,10 @@ const loop = Application.regl.frame(({ time }) => {
                 elements: x.active,
                 model: ocean.geometry.model,  
                 skyboxCubemap: skySimulator.output,
-                lightDirection: sky.lightDirection,
+                sunPosition: sky.sunPosition,
                 heightTex: heightFFT.output,
-                scale: ocean.scale
+                scale: ocean.scale,
+                lightColor: sky.lightColor
             })
         );
     }
