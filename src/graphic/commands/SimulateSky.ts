@@ -29,7 +29,7 @@ export const SimulateSky = Application.regl({
             float distanceToSun = (1.0 / distance(pos, -sunPosition));
             
             vec3 texColor = textureCube(skymap, uv).rgb;
-            vec3 color = ((skyColor * pAngle) + (texColor * nAngle * atmosphere)) + (sunColor * distanceToSun * sunSize);
+            vec3 color = ((skyColor * pAngle + 0.3) + (texColor * nAngle * atmosphere)) + (sunColor * distanceToSun * sunSize);
             vec3 result = mix(vec3(1.0 * pAngle), color, atmosphere + 0.5);
 
             gl_FragColor = vec4(result, 1.0);

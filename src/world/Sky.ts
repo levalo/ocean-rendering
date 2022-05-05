@@ -23,7 +23,7 @@ export class Sky {
     }
 
     public update(t: number) {
-        const angle = t * 0.1;
+        const angle = t * 0.01;
 
         const ct = Math.cos(angle);
         const st = Math.sin(angle);

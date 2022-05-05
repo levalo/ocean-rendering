@@ -25,7 +25,7 @@ export const DrawOcean = Application.regl({
             vec3 normal = normalize(texture2D(heightTex, vUV).rgb);
             normal = normalize(vTBN * normal);
 
-            vec3 foam = mix(vec3(0.0), vec3(1.0), vWorldPosition.y + normal.r);
+            vec3 foam = mix(vec3(0.0), vec3(1.0), (vWorldPosition.y + normal.r) * 0.3);
 
             vec3 ambient = lightColor * lightPower;
 
