@@ -15,6 +15,7 @@ export const DrawOcean = Application.regl({
         varying vec4 vWorldPosition;
         varying vec2 vUV;
         varying mat3 vTBN;
+        varying vec3 vSunWorldPosition;
 
         const vec3 color = vec3(0.0, 0.19, 0.27);
 
@@ -29,7 +30,9 @@ export const DrawOcean = Application.regl({
 
             vec3 ambient = lightColor * lightPower;
 
-            vec3 diff = max(dot(normal, sunPosition), 0.0) * lightColor;
+            vec3 surfaceToLight = normalize(vSunWorldPosition - vWorldPosition.xyz);
+
+            vec3 diff = max(dot(normal, surfaceToLight), 0.0) * lightColor;
             
             vec3 eyeToSurfaceDir = normalize(vWorldPosition.xyz - cameraPosition);
             vec3 direction = reflect(eyeToSurfaceDir, normal);
@@ -48,12 +51,14 @@ export const DrawOcean = Application.regl({
         uniform mat4 model;
 
         uniform sampler2D heightTex;
+        uniform vec3 sunPosition;
 
         uniform float scale;
 
         varying vec4 vWorldPosition;
         varying vec2 vUV;
         varying mat3 vTBN;
+        varying vec3 vSunWorldPosition;
 
         const float wDelta = 1.0 / 128.0;
         const float delta = 1.0 / 8.0;
@@ -65,6 +70,8 @@ export const DrawOcean = Application.regl({
         }
         
         void main() {
+            vSunWorldPosition = (model * vec4(0.0, 128.0 * sunPosition.y, -128.0 * sunPosition.z, 1)).xyz;
+
             vWorldPosition = model * vec4(position.x, 0, position.y, 1);
 
             vUV = vWorldPosition.xz * delta;
